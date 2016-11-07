@@ -40,8 +40,8 @@ class Configer:
         config = args.parse_args()
 
         if config.config is not None:
-            self.config['configfile'] = config.config
             self.__readConfigFromJson(config.config)
+            self.config['configfile'] = config.config
         else:
             self.__readConfigFromJson(self.config['configfile'])
 
@@ -58,8 +58,7 @@ class Configer:
         if not os.path.exists(configfile):
             if configfile == self.config['configfile']:
                 warning('Cannot find default configuration file {}'.format(
-                    configfile
-                ))
+                    configfile))
                 return
             else:
                 error('Cannot find configuration file {}'.format(configfile))
