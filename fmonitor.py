@@ -1,27 +1,28 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from watchdog.observers import Observer
+import subprocess as P
 from warchdog.events import FileSystemEventHandler
 
 
-class ModifyHandler(FileSystemEventHandler):
-    def on_modified(self, event):
-        pass
-
-
-class Fmonitor:
+class Fmonitor(FileSystemEventHandler):
     """
     File monitor
     """
 
     def __init_(self, directory):
-        self.__monitorDir = directory
-        self.debList = []
-        self.dscList = []
+        self.monitorDir = directory
+        self.distribution = "stable"
 
-    def monitor(self):
-        observer = Observer()
-        event_handler = ModifyHandler()
-        observer.schedule(event_handler, self.__monitorDir)
-        observer.start()
+    def on_created(self, event):
+        super(Fmonitor, self).on_created(event)
+        if not event.is_directory and \
+                (event.src_path.endswith("deb") or
+                 event.src_path.endswith("dsc")):
+            packagename = event.src_path
+            self._pchecker(packagename)
+            P.run(["aptly", "repo", "add", self.distribution, packagename],
+                  check=True)
+
+    def _pchecker(self, pkgName):
+        pass
