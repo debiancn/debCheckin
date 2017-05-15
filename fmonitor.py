@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
+import shutil
 import subprocess as P
 from warchdog.events import FileSystemEventHandler
 
@@ -20,9 +22,23 @@ class Fmonitor(FileSystemEventHandler):
                 (event.src_path.endswith("deb") or
                  event.src_path.endswith("dsc")):
             packagename = event.src_path
-            self._pchecker(packagename)
-            P.run(["aptly", "repo", "add", self.distribution, packagename],
-                  check=True)
+            try:
+                self._pchecker(packagename)
+            except Exception as e:
+                pass
+            else:
+                P.run(["aptly", "repo", "add", self.distribution, packagename],
+                      check=True)
+            finally:
+                self._delete(packagename)
+        else:
+            self._delete(packagename)
 
     def _pchecker(self, pkgName):
         pass
+
+    def _delete(self, filename):
+        try:
+            os.remove(filename)
+        except OSError as e:
+            shutil.rmtree(filename)
